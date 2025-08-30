@@ -1,0 +1,99 @@
+### ENV
+@host=localhost
+@port=8082
+@base=http://{{host}}:{{port}}
+
+###
+# 1) Status
+GET {{base}}/status
+
+###
+# 2) Health
+GET {{base}}/health
+
+###
+# 3) (Optional) Open ReDoc docs
+GET {{base}}/docs
+
+###
+# 4) (Optional) Swagger-UI (if enabled in app.py)
+GET {{base}}/swagger
+
+###
+# @name img_to_content
+# 5) Decode QR Image
+POST {{base}}/decode/image
+Content-Type: multipart/form-data; boundary=boundary
+Accept: application/json
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="qr_sample.png"
+Content-Type: image/png
+
+< ./qr_sample.png
+--boundary--
+
+@extracted_qr_data={{img_to_content.response.body.$.raw_data}}
+
+###
+# 6) Decode HCERT
+# @name decodeHcert
+POST {{base}}/decode/hcert
+Content-Type: application/json
+
+{
+  "qr_data": "{{extracted_qr_data}}"
+}
+
+###
+# 7) Extract Metadata
+# @name extractMetadata
+POST {{base}}/extract/metadata
+Content-Type: application/json
+
+{
+  "cose": {{decodeHcert.response.body.$.cose}},
+  "payload": {{decodeHcert.response.body.$.payload}}
+}
+
+###
+# 8) Extract SHLink reference
+# @name extractReference
+POST {{base}}/extract/reference
+Content-Type: application/json
+
+{
+  "hcert": {{decodeHcert.response.body.$.hcert}},
+  "payload": {{decodeHcert.response.body.$.payload}}
+}
+
+###
+# 9) Authorize with PIN/passcode
+# @name authorize
+POST {{base}}/shlink/authorize
+Content-Type: application/json
+
+{
+  "url": "{{extractReference.response.body.$.url}}",
+  "pin": "1234"
+}
+
+###
+# 10) Fetch FHIR resources
+# @name fetchFhir
+POST {{base}}/shlink/fetch-fhir
+Content-Type: application/json
+
+{
+  "manifest": {{authorize.response.body.$.manifest}}
+}
+
+
+
+@fhir={{decodeHcert.response.body.$.payload}}
+
+###
+# 11) (Optional) Fetch FHIR directly
+# @name fetchFhir.fhir
+GET {{authorize.response.body.$.manifest.files[0].location}}
+Accept: application/fhir+json
