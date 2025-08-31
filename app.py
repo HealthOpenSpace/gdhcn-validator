@@ -966,10 +966,17 @@ def decode_hcert():
                 hcert = container[1]
                 logger.info("[hcert] Extracted HCERT (-260/1)")
 
-        # 9) Extract KID (label 4) for convenience
+        # 9) Extract KID (label 4) for convenience and hex representation
         kid_b64 = extract_kid({'protected': cose['protected'], 'unprotected': cose['unprotected']})
+        kid_hex = None
         if kid_b64:
-            logger.info(f"[hcert] KID (b64url)={kid_b64}")
+            try:
+                # Convert base64url KID to hex for WHO spec compliance checking (Appendix A.1)
+                kid_bytes = base64.urlsafe_b64decode(kid_b64 + '=' * (4 - len(kid_b64) % 4))
+                kid_hex = kid_bytes.hex().upper()
+                logger.info(f"[hcert] KID (b64url)={kid_b64}, (hex)={kid_hex}")
+            except:
+                logger.info(f"[hcert] KID (b64url)={kid_b64}")
 
         # 10) Build JSON-safe response (bytes -> base64url envelopes)
         response = {
@@ -983,6 +990,7 @@ def decode_hcert():
                 'protected': bytes_to_json_safe(cose['protected']),
                 'unprotected': bytes_to_json_safe(cose['unprotected']),
                 'kid_b64': kid_b64,
+                'kid_hex': kid_hex,
                 'signature': cose.get('signature'),  # already b64url in decode_cose_sign1
             },
             'payload': bytes_to_json_safe(payload),
@@ -1019,12 +1027,22 @@ def extract_metadata():
         
         # Extract KID
         kid = extract_kid(cose)
+        kid_hex = None
+        if kid:
+            try:
+                # Convert base64url KID to hex for WHO spec compliance (Appendix A.1)
+                kid_bytes = base64.urlsafe_b64decode(kid + '=' * (4 - len(kid) % 4))
+                kid_hex = kid_bytes.hex().upper()
+            except:
+                pass
         
         # Extract issuer
         issuer = extract_issuer(payload)
         
         return jsonify({
             'kid': kid,
+            'kid_b64': kid,
+            'kid_hex': kid_hex,
             'issuer': issuer
         })
         
