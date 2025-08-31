@@ -371,9 +371,9 @@
                 showResult('decode-image-result', result);
                 
                 // Store raw data for next step
-                if (result.raw_data) {
-                    sessionData.rawData = result.raw_data;
-                    document.getElementById('hc1-data').value = result.raw_data;
+                if (result.qr_data) {
+                    sessionData.rawData = result.qr_data;
+                    document.getElementById('hc1-data').value = result.qr_data;
                 }
             } catch (error) {
                 showResult('decode-image-result', error, true);
@@ -492,11 +492,11 @@
             const imgRes = await apiCall('/decode/image', 'POST', formData);
             showResult('decode-image-result', imgRes);
 
-            if (!imgRes.raw_data) throw { error: 'no_raw_data', details: 'QR image did not produce data' };
-            document.getElementById('hc1-data').value = imgRes.raw_data;
+            if (!imgRes.qr_data) throw { error: 'no_qr_data', details: 'QR image did not produce data' };
+            document.getElementById('hc1-data').value = imgRes.qr_data;
 
             // 2) Decode HCERT
-            const hcRes = await apiCall('/decode/hcert', 'POST', { qr_data: imgRes.raw_data });
+            const hcRes = await apiCall('/decode/hcert', 'POST', { qr_data: imgRes.qr_data });
             showResult('decode-hcert-result', hcRes);
 
             // stash

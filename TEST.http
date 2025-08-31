@@ -1,6 +1,6 @@
 ### ENV
 @host=localhost
-@port=8082
+@port=8089
 @base=http://{{host}}:{{port}}
 
 ###
@@ -33,7 +33,7 @@ Content-Type: image/png
 < ./qr_sample.png
 --boundary--
 
-@extracted_qr_data={{img_to_content.response.body.$.raw_data}}
+@extracted_qr_data={{img_to_content.response.body.$.qr_data}}
 
 ###
 # 6) Decode HCERT
@@ -97,3 +97,10 @@ Content-Type: application/json
 # @name fetchFhir.fhir
 GET {{authorize.response.body.$.manifest.files[0].location}}
 Accept: application/fhir+json
+
+
+
+
+
+
+{"url":http://lacpass.create.cl:8182/v2/manifests/ba07611d-b9c8-4104-a086-554d8b6cc014,"pin":"1234"}

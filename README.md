@@ -107,7 +107,7 @@ Example result:
 {
   "decoded": true,
   "format": "hcert",
-  "raw_data": "HC1:6BFOXNMG2N9HZBPYHQ3D69SO5D6%9L60JO DJS4L:P:..."
+  "qr_data": "HC1:6BFOXNMG2N9HZBPYHQ3D69SO5D6%9L60JO DJS4L:P:..."
 }
 ```
 

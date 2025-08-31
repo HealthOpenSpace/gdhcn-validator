@@ -326,7 +326,7 @@ OPENAPI_SPEC = {
         "properties": {
           "decoded": { "type": "boolean" },
           "format": { "type": "string", "enum": ["hcert", "shlink", "url", "unknown"] },
-          "raw_data": { "type": "string" },
+          "qr_data": { "type": "string" },
           "normalization_note": { "type": "string" },
           "removed_chars": { "type": "array", "items": { "type": "object" } }
         }
@@ -415,7 +415,7 @@ OPENAPI_SPEC = {
         "value": {
           "decoded": True,
           "format": "hcert",
-          "raw_data": "HC1:6BFOXNMG2N9HZBPYHQ3D69SO5D6%9L60JO DJS4L:P:R8LCDO%0AA3BI16TMVMJ3$C*2AL+J7AJENS:NK7VCECM:MQ0FE%JC5Y479D/*8G.CV3NV3OVLD86J:KE2HF86GX2BTLHA9A86GNY8XOIROBZQMQOB9MEBED:KE87B MH:8DZYK%KNU9O%UL75E2*KH42$T8CRJ.V89:GF-K8JVT$8LQN YVKY8$IV7/05T8::S%MV6J3$IV747ZIV7WN3$V8U8 IVNVG/U85VCEWVLTVUPVFCN.9FS0JE/8L-AXS8LMFLIF%57LSV$TFVZK%57NTV1IN1$VNVGHVVFWC9UVGYG8UVFGV%TFI3J5XK L0A/S3VGKJN5QN8$SAC71EN/6JU%8.YI3T8O8FPVNRT2OMNR3BBSNTGVCRNY83%%GEO0/933OJOLN4RVQJ0.H9PBL7EPYDK3I6.ROIAW231W/PUA16UEZ3IK6MABH53FW5909VRR91%MS*H9DMNCTNX7P0VYJH5 H7+SR/PTT89E7:TF3.EN$UF$B42SK72/QHR11U0VAY3C9JTB4MVVIB45TJ1XPU0U%*SBMRUS4*C5V.O+HEYBS930.80T5"
+          "qr_data": "HC1:6BFOXNMG2N9HZBPYHQ3D69SO5D6%9L60JO DJS4L:P:R8LCDO%0AA3BI16TMVMJ3$C*2AL+J7AJENS:NK7VCECM:MQ0FE%JC5Y479D/*8G.CV3NV3OVLD86J:KE2HF86GX2BTLHA9A86GNY8XOIROBZQMQOB9MEBED:KE87B MH:8DZYK%KNU9O%UL75E2*KH42$T8CRJ.V89:GF-K8JVT$8LQN YVKY8$IV7/05T8::S%MV6J3$IV747ZIV7WN3$V8U8 IVNVG/U85VCEWVLTVUPVFCN.9FS0JE/8L-AXS8LMFLIF%57LSV$TFVZK%57NTV1IN1$VNVGHVVFWC9UVGYG8UVFGV%TFI3J5XK L0A/S3VGKJN5QN8$SAC71EN/6JU%8.YI3T8O8FPVNRT2OMNR3BBSNTGVCRNY83%%GEO0/933OJOLN4RVQJ0.H9PBL7EPYDK3I6.ROIAW231W/PUA16UEZ3IK6MABH53FW5909VRR91%MS*H9DMNCTNX7P0VYJH5 H7+SR/PTT89E7:TF3.EN$UF$B42SK72/QHR11U0VAY3C9JTB4MVVIB45TJ1XPU0U%*SBMRUS4*C5V.O+HEYBS930.80T5"
         }
       },
       "ErrorNoQr": {
@@ -848,12 +848,12 @@ def decode_image():
         qr = decoded_objects[0]
         raw_bytes = qr.data
         if raw_bytes.startswith(b'HC1:') or raw_bytes.startswith(b'shlink://') or raw_bytes.startswith(b'http'):
-            raw_data = raw_bytes.decode('utf-8')
+            qr_data = raw_bytes.decode('utf-8')
         else:
-            raw_data = raw_bytes.hex()  # or base64 if you prefer
+            qr_data = raw_bytes.hex()  # or base64 if you prefer
             
         # Normalize the data
-        normalized_data, removed_chars = normalize_text(raw_data)
+        normalized_data, removed_chars = normalize_text(qr_data)
         
         # Determine format
         format_type = 'unknown'
@@ -867,7 +867,7 @@ def decode_image():
         response = {
             'decoded': True,
             'format': format_type,
-            'raw_data': normalized_data
+            'qr_data': normalized_data
         }
         
         if removed_chars:
